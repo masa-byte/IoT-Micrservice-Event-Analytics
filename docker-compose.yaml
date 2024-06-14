@@ -19,6 +19,37 @@ services:
       - "4222:4222"
     networks:
       - mynet
+  
+  manager:
+    image: emqx/ekuiper-manager:1.8.0
+    container_name: manager
+    ports:
+      - "9082:9082"
+    restart: unless-stopped
+    volumes:
+      - /tmp/manager_data:/ekuiper-manager/data
+    environment:
+      DEFAULT_EKUIPER_ENDPOINT: "http://ekuiper:9081" 
+    networks:
+      - mynet
+  
+  ekuiper:
+    image: lfedge/ekuiper:1.8.0
+    ports:
+      - "9081:9081"
+    container_name: ekuiper
+    hostname: ekuiper
+    restart: unless-stopped
+    user: root
+    volumes:
+      - /tmp/data:/kuiper/data
+      - /tmp/log:/kuiper/log
+    environment:
+      MQTT_SOURCE__DEFAULT__SERVER: "tcp://broker.emqx.io:1883"
+      KUIPER__BASIC__CONSOLELOG: "true"
+      KUIPER__BASIC__IGNORECASE: "false"
+    networks:
+      - mynet
 
 
 networks:
