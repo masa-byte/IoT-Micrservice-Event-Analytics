@@ -10,9 +10,8 @@ sensor_topic = "sensor/pond"
 
 def get_files():
     directory = os.path.dirname(os.path.realpath(__file__))
-    parent_directory = os.path.join(directory, os.pardir)
     ponds = []
-    path = os.path.join(parent_directory, "dataset")
+    path = os.path.join(directory, "dataset")
     for file in os.listdir(path):
         if file.endswith(".csv"):
             ponds.append(os.path.join(path, file))
@@ -49,7 +48,7 @@ def load_data_from_csv(pond_path, limit, offset):
                 publish.single(
                     sensor_topic + "/" + str(data["PondId"]),
                     payload=json_data,
-                    hostname="localhost",
+                    hostname="mosquitto",
                     port=8883,
                     client_id="",
                     keepalive=60,

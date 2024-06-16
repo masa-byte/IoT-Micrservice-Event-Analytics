@@ -70,6 +70,14 @@ services:
       - ./volumes/grafana:/var/lib/grafana
     networks:
       - mynet
+  
+  server-microservice:
+    image: server-microservice
+    container_name: server-microservice
+    networks:
+      - mynet
+    depends_on:
+      - mosquitto
 
 networks:
   mynet:
