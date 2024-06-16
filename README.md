@@ -1,23 +1,23 @@
 # Microservice Application for IOT 
-This is part two of a project for course **Internet of Things and Services**
+This is part three of a project for course **Internet of Things and Services**
 <br>
 <br>
 
 ### Application type
-This application is tested through clients like **Postman**, and **Insomnia** and **Swagger**. It is a **microservice** application, meaning it is divided into multiple services, each with its own responsibility.
+This application has its own web interface for checking the results, and visualizations can be done with **Grafana**. It is a **microservice** application, meaning it is divided into multiple services, each with its own responsibility.
 <br>
 
 ### Idea
-The idea is to have 3 microservices that communicate with each other using MQTT, and one of them has REST API for communication with clients.
+The idea is to have 3 microservices that communicate with each other using MQTT, NATS, and one of them has web interface for the clients to see the events in real time.
 
 ### Architecture
-The first microservice was written in **Python** and it is acting as a sensor, which is reading the data from a database (simulating the way data would arrive in real-time) and sending that to a MQTT topic. The second microservice was written in **Python** as well and it is acting as an analytics service, which is collecting the data from sensor and is sending it to **eKuiper** for analysis, and then forwarding results to another MQTT topic. The last microservice is acting as an access point for clients, meaning it implements REST API and is subscribing to the topic with event info from the analytics service. The last microservice is written in **.NET Core**.
+The first microservice is written in **Python** and it is the Server microservice. It simulates data stream from a csv file and sends that to an **MQTT** topic. The second microservice is written in **Python** and it is the Filter microservice. It reads the data from the MQTT topic and filters it based on the time window, sending the aggregated data to a NATS topic. The third microservice is written in **.NET Core** and it is the Command microservice. It is subscribed to the **MQTT** topic on which **eKuiper** send analysis data, and has a web interface to display the events to the clients. it uses **SignalR** to do that. The fourth microservice is written in **NestJS** and it is subscribed to the NATS topic. It collects the data, stores in it **InfluxDB**. Lastly, **Grafana** is used for visualization.
 
 ### Data
-The database is **PostgreSQL**. The dataset used is https://www.kaggle.com/datasets/ogbuokiriblessing/sensor-based-aquaponics-fish-pond-datasets?select=IoTPond10.csv. The dataset is about the sensor data from aquaponics fish ponds. The data is about the temperature, pH, oxygen level, etc. in the water. I have cleaned the data and added pond_id to the data, and when importing the data, entry_id will be overridden to keep consistency and unique keys. The data is stored in the database, and the sensor microservice reads from it.
+The database is **InfluxDB**. The dataset used is https://www.kaggle.com/datasets/ogbuokiriblessing/sensor-based-aquaponics-fish-pond-datasets?select=IoTPond10.csv. The dataset is about the sensor data from aquaponics fish ponds. The data is about the temperature, pH, oxygen level, etc. in the water. I have cleaned the data and added pond_id to the data. The data is stored in csv files and the Server Microservice reads from them and simulates real time stream.
 
 ### Tech stack
-It was written in **.NET Core** and **Python**, and uses **PostgreSQL** as the database, and **MQTT** and **REST**. MQTT broker is **eclipse-mosquitto**. **eKuiper** is used for analytics. **Docker** is used for containerization. **Docker-compose** is used for orchestration. **pgAdmin** is used for database GUI. **Swagger** is used for API documentation. **Postman** and **Insomnia** are used for testing.
+It was written in **.NET Core**, **NestJS**, and **Python**, and uses **InfluxDB** as the database, and **MQTT** and **NATS**. MQTT broker is **eclipse-mosquitto**. **eKuiper** is used for analytics. **Docker** is used for containerization. **Docker-compose** is used for orchestration. **Grafana** is used for visualization. **SignalR** is used for real time communication.
 <br>
 <br>
 
@@ -25,21 +25,24 @@ It was written in **.NET Core** and **Python**, and uses **PostgreSQL** as the d
 1. Clone the repository
 2. Open the repository in Visual Studio Code
 3. Open the terminal in Visual Studio Code
-4. Inside of EventInfo, run the following command:
-    - `dotnet ef database update`
-5. Run the following command:
+4. Run the following command:
     - `docker-compose up`
-6. Wait for the services to start
-7. Run the import-data.py script to import the data into the database
-8. Sensor service needs to be restarted to start sending data to MQTT
-9. To test the REST API, use Postman or Insomnia
-    - GET http://localhost:5117/messages
-    - GET http://localhost:5117/messages/{id}
-    - GET http://localhost:5117/messages/phAlerts
-    - GET http://localhost:5117/messages/temperatureAlerts
-10. Database GUI is available on http://localhost:5050/ 
-    - Username: admin@gmail.com
-    - Password: 123
-11. EKuiper GUI is available on http://localhost:9082/ 
+5. Wait for the services to start
+6. The application is available on http://localhost:5000/
+7. InfluxDB GUI is available on http://localhost:8086/ 
+    - Username: masa
+    - Password: masaadmin
+8. EKuiper GUI is available on http://localhost:9082/ 
     - Username: admin
     - Password: public
+12. Grafana GUI is available on http://localhost:3000/
+    - Username: admin
+    - Password: admin
+Query for Grafana:
+```
+from(bucket: "bucket")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "agg_pond_data")
+  |> filter(fn: (r) => r["PondId"] == "1")
+  |> filter(fn: (r) => r["_field"] == "Ammonia_g_mL" or r["_field"] == "DissolvedOxygen_g_mL" or r["_field"] == "Duration" or r["_field"] == "Nitrite_g_mL" or r["_field"] == "Population" or r["_field"] == "FishLength_cm" or r["_field"] == "FishWeight_g" or r["_field"] == "Temperature_C" or r["_field"] == "Turbidity_ntu" or r["_field"] == "pH")
+```
