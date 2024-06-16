@@ -79,6 +79,25 @@ services:
     depends_on:
       - mosquitto
 
+  filter-microservice:
+    image: filter-microservice
+    container_name: filter-microservice
+    networks:
+      - mynet
+    depends_on:
+      - mosquitto
+      - nats
+
+  dashboard-microservice:
+    image: dashboard-microservice
+    container_name: dashboard-microservice
+    networks:
+      - mynet
+    depends_on:
+      - nats
+      - influxdb
+      - grafana
+
 networks:
   mynet:
     driver: bridge

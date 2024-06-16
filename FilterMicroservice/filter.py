@@ -29,7 +29,7 @@ lock = threading.Lock()
 
 
 async def publish_aggregated_data(aggregated_data):
-    nc = await nats.connect("nats://localhost:4222")
+    nc = await nats.connect("nats://nats:4222")
     aggregated_data["StartTime"] = aggregated_data["StartTime"].strftime(
         "%Y-%m-%d %H:%M:%S"
     )
@@ -117,7 +117,7 @@ def start_filter():
     client.on_message = on_message
     client.on_publish = on_publish
 
-    client.connect("localhost", 8883, 60)
+    client.connect("mosquitto", 8883, 60)
 
     client.loop_forever()
 
