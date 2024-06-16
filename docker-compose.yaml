@@ -98,6 +98,18 @@ services:
       - influxdb
       - grafana
 
+  command-microservice:
+    image: commandmicroservice
+    container_name: command-microservice
+    ports:
+      - "5117:80"
+    networks:
+      - mynet
+    depends_on:
+      - mosquitto
+      - ekuiper
+      - manager
+
 networks:
   mynet:
     driver: bridge

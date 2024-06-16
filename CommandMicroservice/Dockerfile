@@ -6,15 +6,17 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["CommandMicroservice/CommandMicroservice.csproj", "CommandMicroservice/"]
-RUN dotnet restore "CommandMicroservice/CommandMicroservice.csproj"
+COPY ["CommandMicroservice.csproj", "."]
+RUN dotnet restore "./CommandMicroservice.csproj"
 COPY . .
-WORKDIR "/src/CommandMicroservice"
-RUN dotnet build "CommandMicroservice.csproj" -c Release -o /app/build
+WORKDIR "/src/."
+RUN dotnet build "./CommandMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "CommandMicroservice.csproj" -c Release -o /app/publish /p:UseAppHost=false
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./CommandMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

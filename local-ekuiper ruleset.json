@@ -1,10 +1,10 @@
 {
   "streams": {
-    "ponddata": "\n              CREATE STREAM ponddata\n              (\n      PondId bigint, CreatedAt datetime, EntryId bigint, Temperature_C float, Turbidity_ntu bigint, DissolvedOxygen_g_mL float, pH float, Ammonia_g_mL float, Nitrite_g_mL float, Population bigint, FishLength_cm float, FishWeight_g float\n    )\n              WITH (DATASOURCE=\"sensor/pond/+\", FORMAT=\"json\", CONF_KEY=\"local-mosquitto\", TYPE=\"mqtt\", SHARED=\"false\", );\n          "
+    "ponddata": "\n              CREATE STREAM pondsData\n              (\n      PondId bigint, CreatedAt datetime, EntryId bigint, Temperature_C float, Turbidity_ntu bigint, DissolvedOxygen_g_mL float, pH float, Ammonia_g_mL float, Nitrite_g_mL float, Population bigint, FishLength_cm float, FishWeight_g float\n    )\n              WITH (DATASOURCE=\"sensor/pond/+\", FORMAT=\"json\", CONF_KEY=\"local-mosquitto\", TYPE=\"mqtt\", SHARED=\"false\", );\n          "
   },
-  "tables": {},
+  "tables": { },
   "rules": {
-    "1": "{\"id\":\"1\",\"name\":\"Temperature Alarm\",\"sql\":\"SELECT PondId, AVG(Temperature_C) as AvgTemperature_C\\r\\nFROM ponddata\\r\\nGROUP BY PondId, HOPPINGWINDOW(ss, 15, 5)\\r\\nHAVING AvgTemperature_C > 24 OR AvgTemperature_C < 18;\",\"actions\":[{\"mqtt\":{\"server\":\"mosquitto:8883\",\"topic\":\"ekuiper/data\",\"runAsync\":false,\"omitIfEmpty\":false,\"sendSingle\":true,\"bufferLength\":1024,\"enableCache\":false,\"format\":\"json\"}}],\"options\":{\"restartStrategy\":{}}}",
-    "2": "{\"id\":\"2\",\"name\":\"Ph Alarm\",\"sql\":\"SELECT PondId, MAX(pH) as MaxpH\\r\\nFROM ponddata\\r\\nGROUP BY PondId, TUMBLINGWINDOW(ss, 10)\\r\\nHAVING MaxpH > 9 or MaxpH < 5;\",\"actions\":[{\"mqtt\":{\"server\":\"mosquitto:8883\",\"topic\":\"ekuiper/data\",\"runAsync\":false,\"omitIfEmpty\":false,\"sendSingle\":true,\"bufferLength\":1024,\"enableCache\":false,\"format\":\"json\"}}],\"options\":{\"restartStrategy\":{}}}"
+    "1": "{\"id\":\"1\",\"name\":\"Temperature Alarm\",\"sql\":\"SELECT PondId, AVG(Temperature_C) as AvgTemperature_C\\r\\nFROM pondsData\\r\\nGROUP BY PondId, HOPPINGWINDOW(ss, 15, 5)\\r\\nHAVING AvgTemperature_C > 24 OR AvgTemperature_C < 18;\",\"actions\":[{\"mqtt\":{\"server\":\"mosquitto:8883\",\"topic\":\"ekuiper/data\",\"runAsync\":false,\"omitIfEmpty\":false,\"sendSingle\":true,\"bufferLength\":1024,\"enableCache\":false,\"format\":\"json\"}}],\"options\":{\"restartStrategy\":{}}}",
+    "2": "{\"id\":\"2\",\"name\":\"Ph Alarm\",\"sql\":\"SELECT PondId, MAX(pH) as MaxpH\\r\\nFROM pondsData\\r\\nGROUP BY PondId, TUMBLINGWINDOW(ss, 10)\\r\\nHAVING MaxpH > 9 or MaxpH < 5;\",\"actions\":[{\"mqtt\":{\"server\":\"mosquitto:8883\",\"topic\":\"ekuiper/data\",\"runAsync\":false,\"omitIfEmpty\":false,\"sendSingle\":true,\"bufferLength\":1024,\"enableCache\":false,\"format\":\"json\"}}],\"options\":{\"restartStrategy\":{}}}"
   }
 }
