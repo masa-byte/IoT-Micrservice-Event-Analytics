@@ -6,7 +6,7 @@ export const INFLUXDB_ORG = "student"
 
 export const INFLUXDB_BUCKET = "bucket"
 
-export const INFLUXDB_URL = "http://localhost:8086"
+export const INFLUXDB_URL = "http://influxdb:8086"
 
 export const INFLUX_USER = "masa"
 
